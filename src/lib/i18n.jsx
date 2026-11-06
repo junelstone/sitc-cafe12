@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from 'react'
 
 const dict = {
   fr: {
+    notify_customer: 'Prévenir le client', notified: 'prévenu le', no_phone: 'Ajoutez le téléphone du client pour pouvoir le prévenir.',
     nav_drawer: 'Clôture', nav_expenses: 'Dépenses',
     drawer_title: 'Clôture de caisse', since: 'Depuis', opening_float: 'Fond de caisse (début)', cash_in: 'Ventes en espèces', cash_out: 'Dépenses en espèces',
     expected: 'Attendu dans la caisse', counted: 'Montant compté', difference: 'Écart', close_drawer: 'Clôturer la caisse', drawer_ok: 'Caisse juste ✓',
@@ -53,6 +54,7 @@ const dict = {
     add_item: 'Ajouter un article', language: 'Langue',
   },
   en: {
+    notify_customer: 'Tell the customer', notified: 'told on', no_phone: 'Add the customer phone to be able to notify them.',
     nav_drawer: 'Close till', nav_expenses: 'Expenses',
     drawer_title: 'Close the cash drawer', since: 'Since', opening_float: 'Opening float', cash_in: 'Cash sales', cash_out: 'Cash expenses',
     expected: 'Expected in drawer', counted: 'Counted amount', difference: 'Difference', close_drawer: 'Close the drawer', drawer_ok: 'Drawer balances ✓',

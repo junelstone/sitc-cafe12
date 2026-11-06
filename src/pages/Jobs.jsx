@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { fcfa } from '../lib/format'
 import { errText } from '../lib/errors'
 import PayBox from '../components/PayBox.jsx'
+import { intlPhone, readyMessage, smsUrl, whatsappUrl } from '../lib/notify'
 import Receipt from '../components/Receipt.jsx'
 
 const FLOW = ['received', 'in_progress', 'ready', 'collected']
@@ -23,6 +24,8 @@ export default function Jobs() {
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [receipt, setReceipt] = useState(null)
+  const [biz, setBiz] = useState(null)
+  useEffect(() => { supabase.from('settings').select('business_name').single().then(({ data }) => setBiz(data)) }, [])
 
   async function load() {
     let qy = supabase.from('jobs').select('*').order('created_at', { ascending: false }).limit(300)
@@ -89,7 +92,7 @@ export default function Jobs() {
             <tr key={j.id} className={'click ' + (sel?.id === j.id ? 'sel ' : '') + (j.status === 'cancelled' ? 'dim' : '')} onClick={() => { setSel(j); setPayAmt(''); setForm(null) }}>
               <td><b>{j.job_no}</b></td>
               <td>{j.customer_name}<div className="muted small">{t('kind_' + j.kind)}{j.pages ? ` · ${j.pages} p.` : ''}</div></td>
-              <td><span className={'pill st-' + j.status}>{t('st_' + j.status)}</span>{isLate(j) && <span className="pill warnpill">{t('late')}</span>}</td>
+              <td><span className={'pill st-' + j.status}>{t('st_' + j.status)}</span>{isLate(j) && <span className="pill warnpill">{t('late')}</span>}{j.status === 'ready' && j.notified_at && <span title={t('notified')}> 💬</span>}</td>
               <td className="small">{fmtDate(j.due_at)}</td>
               <td className="num">{j.price - j.paid > 0 ? <span className="warn">{fcfa(j.price - j.paid)}</span> : '✓'}</td>
             </tr>))}</tbody>
@@ -115,6 +118,15 @@ export default function Jobs() {
                   {sel.status === 'ready' && <button className="btn primary" disabled={sel.paid < sel.price} title={sel.paid < sel.price ? t('must_pay_first') : ''} onClick={() => patch(sel.id, { status: 'collected' })}>✓ {t('collect')}</button>}
                 </div>
                 {sel.status === 'ready' && sel.paid < sel.price && <p className="muted small">{t('must_pay_first')}</p>}
+                {sel.status === 'ready' && (intlPhone(sel.customer_phone) ? (
+                  <div className="notify">
+                    <span className="small"><b>{t('notify_customer')}</b>{sel.notified_at && <span className="muted"> · {t('notified')} {fmtDate(sel.notified_at)}</span>}</span>
+                    <div className="row wrap">
+                      <a className="btn wa" target="_blank" rel="noreferrer" href={whatsappUrl(sel.customer_phone, readyMessage(sel, biz, sel.price - sel.paid))} onClick={() => patch(sel.id, { notified_at: new Date().toISOString() })}>💬 WhatsApp</a>
+                      <a className="btn" href={smsUrl(sel.customer_phone, readyMessage(sel, biz, sel.price - sel.paid))} onClick={() => patch(sel.id, { notified_at: new Date().toISOString() })}>✉️ SMS</a>
+                    </div>
+                  </div>
+                ) : <p className="muted small">{t('no_phone')}</p>)}
                 {sel.price > sel.paid && (
                   <div className="paywrap">
                     <h3>{t('take_payment')}</h3>
@@ -125,7 +137,8 @@ export default function Jobs() {
                 )}
                 <details><summary className="muted small">{t('edit')}</summary>
                   <div className="grid2 mt">
-                    <label>{t('price_agreed')}<input type="number" min={sel.paid} defaultValue={sel.price} onBlur={(e) => Number(e.target.value) !== sel.price && patch(sel.id, { price: parseInt(e.target.value, 10) || 0 })} /></label>
+                    <label>{t('customer_phone')}<input key={sel.id + 'p'} type="tel" defaultValue={sel.customer_phone} onBlur={(e) => e.target.value !== sel.customer_phone && patch(sel.id, { customer_phone: e.target.value.trim() })} /></label>
+                    <label>{t('price_agreed')}<input key={sel.id + 'pr'} type="number" min={sel.paid} defaultValue={sel.price} onBlur={(e) => Number(e.target.value) !== sel.price && patch(sel.id, { price: parseInt(e.target.value, 10) || 0 })} /></label>
                     <label>&nbsp;<button type="button" className="btn ghost" onClick={() => patch(sel.id, { status: 'cancelled' })}>{t('st_cancelled')}</button></label>
                   </div>
                 </details>

@@ -102,3 +102,5 @@ tr.click { cursor: pointer; } tr.click:hover td { background: #f7f9fc; } tr.sel 
 .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
 .stock-card { display: grid; gap: 8px; margin: 0; } .stock-card.low { border-color: #fdba74; } .stock-card .qty { font-size: 1.6rem; font-weight: 800; }
 .drawer { display: grid; gap: 12px; max-width: 520px; }
+.notify { display: grid; gap: 8px; padding: 10px; border-radius: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.btn.wa { background: #25d366; border-color: #25d366; color: #fff; text-decoration: none; } a.btn { text-decoration: none; color: inherit; display: inline-block; }
