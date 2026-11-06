@@ -42,7 +42,7 @@ export default function Receipt({ saleId, onClose }) {
         <div className="r-tot">
           {sale.discount > 0 && <><div><span>{t('subtotal')}</span><span>{fcfa(sale.subtotal)}</span></div><div><span>{t('discount')}</span><span>-{fcfa(sale.discount)}</span></div></>}
           <div className="big"><span>{t('total')}</span><span>{fcfa(sale.total)}</span></div>
-          <div><span>{sale.payment_method === 'cash' ? t('pay_cash') : t('pay_momo')}</span><span>{sale.payment_method === 'cash' ? fcfa(sale.amount_received || sale.total) : sale.momo_ref}</span></div>
+          <div><span>{sale.payment_method === 'cash' ? t('pay_cash') : sale.payment_method === 'account' ? t('pay_account') : t('pay_momo')}</span><span>{sale.payment_method === 'cash' ? fcfa(sale.amount_received || sale.total) : sale.payment_method === 'account' ? sale.customer_name : sale.momo_ref}</span></div>
           {sale.payment_method === 'cash' && sale.amount_received > sale.total && <div><span>{t('change_due')}</span><span>{fcfa(sale.amount_received - sale.total)}</span></div>}
         </div>
         <div className="r-foot">{biz?.receipt_footer}</div>

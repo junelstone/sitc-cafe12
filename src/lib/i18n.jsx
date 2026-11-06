@@ -2,6 +2,13 @@ import { createContext, useContext, useState } from 'react'
 
 const dict = {
   fr: {
+    nav_customers: 'Clients', add_customer: 'Nouveau client', individual: 'Particulier', business_kind: 'Entreprise', credit_limit: 'Crédit autorisé',
+    balance_short: 'Solde', owes: 'Le client doit de l\u2019argent', prepaid: 'Solde prépayé', pay_debt: 'Régler la dette', add_credit: 'Recharger le compte',
+    all_owed: 'Tout', total_owed: 'Total dû par les clients', ae_purchase: 'Achat', ae_topup: 'Recharge', ae_void: 'Annulation',
+    find_customer: 'Compte client (nom ou téléphone)', after_sale_balance: 'Solde après la vente',
+    err_credit_limit: 'Crédit autorisé dépassé pour ce client.', err_customer_required: 'Choisissez un compte client.', err_unknown_customer: 'Client introuvable.', err_balance_locked: 'Le solde ne peut changer que par une vente ou une recharge.',
+    offline_mode: 'Hors ligne : les ventes sont gardées et seront envoyées au retour d\u2019internet.', pending_sales: 'vente(s) en attente d\u2019envoi', send_now: 'Envoyer',
+    failed_sales: 'vente(s) refusée(s) par le serveur', provisional_receipt: 'REÇU PROVISOIRE (HORS LIGNE)', install_app: 'Installer l\u2019application',
     nav_vouchers: 'Wi-Fi', left: 'restants', sold: 'Vendus', sell_code: 'Vendre un code', voucher_plans: 'Forfaits Wi-Fi', duration: 'Durée', add_plan: 'Ajouter un forfait',
     import_codes: 'Importer des codes HotspotGate', batch: 'Lot', codes: 'Codes', codes_hint: 'Collez les codes générés dans HotspotGate, un par ligne', import: 'Importer', codes_imported: 'codes importés.', recent_sold: 'Derniers codes vendus',
     err_no_vouchers_left: 'Plus de codes disponibles pour ce forfait.', err_unknown_plan: 'Forfait inconnu.',
@@ -58,6 +65,13 @@ const dict = {
     add_item: 'Ajouter un article', language: 'Langue',
   },
   en: {
+    nav_customers: 'Customers', add_customer: 'New customer', individual: 'Individual', business_kind: 'Business', credit_limit: 'Credit limit',
+    balance_short: 'Balance', owes: 'Customer owes money', prepaid: 'Prepaid balance', pay_debt: 'Pay off debt', add_credit: 'Top up account',
+    all_owed: 'All', total_owed: 'Total owed by customers', ae_purchase: 'Purchase', ae_topup: 'Top-up', ae_void: 'Void',
+    find_customer: 'Customer account (name or phone)', after_sale_balance: 'Balance after sale',
+    err_credit_limit: 'Credit limit exceeded for this customer.', err_customer_required: 'Choose a customer account.', err_unknown_customer: 'Customer not found.', err_balance_locked: 'The balance only changes through a sale or a top-up.',
+    offline_mode: 'Offline: sales are kept and will be sent when the internet is back.', pending_sales: 'sale(s) waiting to be sent', send_now: 'Send',
+    failed_sales: 'sale(s) rejected by the server', provisional_receipt: 'PROVISIONAL RECEIPT (OFFLINE)', install_app: 'Install the app',
     nav_vouchers: 'Wi-Fi', left: 'left', sold: 'Sold', sell_code: 'Sell a code', voucher_plans: 'Wi-Fi plans', duration: 'Duration', add_plan: 'Add a plan',
     import_codes: 'Import HotspotGate codes', batch: 'Batch', codes: 'Codes', codes_hint: 'Paste the codes generated in HotspotGate, one per line', import: 'Import', codes_imported: 'codes imported.', recent_sold: 'Recently sold codes',
     err_no_vouchers_left: 'No codes left for this plan.', err_unknown_plan: 'Unknown plan.',

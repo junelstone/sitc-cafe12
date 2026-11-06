@@ -29,7 +29,7 @@ export default function Report() {
 
   const live = sales.filter((s) => !s.voided)
   const sum = (arr) => arr.reduce((a, s) => a + s.total, 0)
-  const byPay = { cash: sum(live.filter((s) => s.payment_method === 'cash')), mobile_money: sum(live.filter((s) => s.payment_method === 'mobile_money')) }
+  const byPay = { cash: sum(live.filter((s) => s.payment_method === 'cash')), mobile_money: sum(live.filter((s) => s.payment_method === 'mobile_money')), account: sum(live.filter((s) => s.payment_method === 'account')) }
   const byStaff = useMemo(() => Object.values(live.reduce((m, s) => { const k = s.staff?.full_name || '?'; m[k] = m[k] || { name: k, n: 0, total: 0 }; m[k].n++; m[k].total += s.total; return m }, {})), [sales])
   const byService = useMemo(() => Object.values(items.reduce((m, i) => { m[i.label] = m[i.label] || { label: i.label, q: 0, total: 0 }; m[i.label].q += Number(i.quantity); m[i.label].total += i.line_total; return m }, {})).sort((a, b) => b.total - a.total), [items])
   const label = (l) => { const [fr, en] = l.split(' / '); return lang === 'fr' ? fr : (en || fr) }
@@ -51,6 +51,7 @@ export default function Report() {
         <div className="kpi main"><span>{t('total')}</span><b>{fcfa(sum(live))}</b><small>{live.length} {t('sales_count').toLowerCase()}</small></div>
         <div className="kpi"><span>💵 {t('pay_cash')}</span><b>{fcfa(byPay.cash)}</b></div>
         <div className="kpi"><span>📱 {t('pay_momo')}</span><b>{fcfa(byPay.mobile_money)}</b></div>
+        {byPay.account > 0 && <div className="kpi"><span>👤 {t('pay_account')}</span><b>{fcfa(byPay.account)}</b></div>}
       </div>
       <div className="grid2">
         {isAdmin && <div className="card flush"><table><thead><tr><th>{t('by_staff')}</th><th className="num">{t('sales_count')}</th><th className="num">{t('total')}</th></tr></thead>
@@ -67,7 +68,7 @@ export default function Report() {
               <td><a href="#" onClick={(e) => { e.preventDefault(); setOpen(s.id) }}>{String(s.receipt_no).padStart(6, '0')}</a>{s.voided && <span className="pill warnpill">{t('voided')}</span>}</td>
               <td>{new Date(s.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
               <td>{s.staff?.full_name}</td>
-              <td>{s.payment_method === 'cash' ? t('pay_cash') : `${t('pay_momo')} · ${s.momo_ref}`}</td>
+              <td>{s.payment_method === 'cash' ? t('pay_cash') : s.payment_method === 'account' ? t('pay_account') : `${t('pay_momo')} · ${s.momo_ref}`}</td>
               <td className="num">{fcfa(s.total)}</td>
               <td className="num">{isAdmin && !s.voided && <button className="btn ghost small" onClick={() => voidSale(s.id)}>{t('void')}</button>}</td>
             </tr>))}</tbody>

@@ -16,8 +16,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!session) { setProfile(null); return }
+    const key = 'sitc.profile.' + session.user.id
+    try { const c = JSON.parse(localStorage.getItem(key)); if (c) setProfile(c) } catch { /* no cache */ }
     supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      .then(({ data }) => setProfile(data))
+      .then(({ data }) => { if (data) { setProfile(data); try { localStorage.setItem(key, JSON.stringify(data)) } catch { /* storage blocked */ } } })
   }, [session])
 
   const value = {

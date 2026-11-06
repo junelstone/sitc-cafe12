@@ -110,3 +110,10 @@ tr.click { cursor: pointer; } tr.click:hover td { background: #f7f9fc; } tr.sel 
 .bar div { width: 100%; background: var(--brand); border-radius: 3px 3px 0 0; min-height: 1px; }
 .bar span { font-size: .6rem; color: var(--muted); }
 .r-code { font: 800 1.4rem ui-monospace, monospace; letter-spacing: .1em; border: 2px dashed #333; text-align: center; padding: 6px; margin: 6px 0; }
+.seg.three { grid-template-columns: 1fr 1fr 1fr; }
+.cust-search { position: relative; } .cust-search input { width: 100%; }
+.dropdown { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 20px rgba(16,24,40,.12); overflow: hidden; }
+.dropdown button { font: inherit; display: block; width: 100%; text-align: left; padding: 10px 12px; border: 0; background: #fff; cursor: pointer; } .dropdown button:hover { background: #f2f6fc; }
+.acct-pill { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; background: #e8f0fb; border-radius: 8px; }
+.hist { display: grid; gap: 6px; max-height: 260px; overflow: auto; }
+.offline-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 8px 16px; background: #fff7ed; border-bottom: 1px solid #fed7aa; font-size: .9rem; }
