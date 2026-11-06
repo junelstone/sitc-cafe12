@@ -2,6 +2,9 @@ import { createContext, useContext, useState } from 'react'
 
 const dict = {
   fr: {
+    nav_vouchers: 'Wi-Fi', left: 'restants', sold: 'Vendus', sell_code: 'Vendre un code', voucher_plans: 'Forfaits Wi-Fi', duration: 'Durée', add_plan: 'Ajouter un forfait',
+    import_codes: 'Importer des codes HotspotGate', batch: 'Lot', codes: 'Codes', codes_hint: 'Collez les codes générés dans HotspotGate, un par ligne', import: 'Importer', codes_imported: 'codes importés.', recent_sold: 'Derniers codes vendus',
+    err_no_vouchers_left: 'Plus de codes disponibles pour ce forfait.', err_unknown_plan: 'Forfait inconnu.',
     nav_reports: 'Rapports', revenue: 'Chiffre d\u2019affaires', profit: 'Bénéfice', by_day: 'Ventes par jour', summary: 'Résumé', pay_account: 'Compte client',
     notify_customer: 'Prévenir le client', notified: 'prévenu le', no_phone: 'Ajoutez le téléphone du client pour pouvoir le prévenir.',
     nav_drawer: 'Clôture', nav_expenses: 'Dépenses',
@@ -55,6 +58,9 @@ const dict = {
     add_item: 'Ajouter un article', language: 'Langue',
   },
   en: {
+    nav_vouchers: 'Wi-Fi', left: 'left', sold: 'Sold', sell_code: 'Sell a code', voucher_plans: 'Wi-Fi plans', duration: 'Duration', add_plan: 'Add a plan',
+    import_codes: 'Import HotspotGate codes', batch: 'Batch', codes: 'Codes', codes_hint: 'Paste the codes generated in HotspotGate, one per line', import: 'Import', codes_imported: 'codes imported.', recent_sold: 'Recently sold codes',
+    err_no_vouchers_left: 'No codes left for this plan.', err_unknown_plan: 'Unknown plan.',
     nav_reports: 'Reports', revenue: 'Revenue', profit: 'Profit', by_day: 'Sales by day', summary: 'Summary', pay_account: 'Customer account',
     notify_customer: 'Tell the customer', notified: 'told on', no_phone: 'Add the customer phone to be able to notify them.',
     nav_drawer: 'Close till', nav_expenses: 'Expenses',

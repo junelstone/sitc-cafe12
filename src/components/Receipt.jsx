@@ -37,7 +37,7 @@ export default function Receipt({ saleId, onClose }) {
         </div>
         {sale.voided && <div className="r-void">*** {t('voided').toUpperCase()} ***</div>}
         <table className="r-items"><tbody>{items.map((i) => (
-          <tr key={i.id}><td>{label(i.label)}<div className="r-sub">{num(i.quantity)} × {fcfa(i.unit_price)}</div></td><td className="num">{fcfa(i.line_total)}</td></tr>
+          <tr key={i.id}><td>{label(i.label)}{/Code ?: ?(\S+)/.test(i.label) && <div className="r-code">{i.label.match(/Code ?: ?(\S+)/)[1]}</div>}<div className="r-sub">{num(i.quantity)} × {fcfa(i.unit_price)}</div></td><td className="num">{fcfa(i.line_total)}</td></tr>
         ))}</tbody></table>
         <div className="r-tot">
           {sale.discount > 0 && <><div><span>{t('subtotal')}</span><span>{fcfa(sale.subtotal)}</span></div><div><span>{t('discount')}</span><span>-{fcfa(sale.discount)}</span></div></>}
