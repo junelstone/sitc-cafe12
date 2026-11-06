@@ -3,6 +3,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { useI18n } from '../lib/i18n.jsx'
 import { configured } from '../lib/supabase'
 import LangSwitch from '../components/LangSwitch.jsx'
+import InstallButton from '../components/InstallButton.jsx'
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -31,6 +32,7 @@ export default function Login() {
         <label>{t('password')}<input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" /></label>
         {err && <p className="alert">{err}</p>}
         <button className="btn primary full" disabled={busy || !configured}>{t('signIn')}</button>
+        <div className="row" style={{ justifyContent: 'center' }}><InstallButton /></div>
         <p className="muted small center-text">Stone's IT Consulting · Brazzaville</p>
       </form>
     </div>
