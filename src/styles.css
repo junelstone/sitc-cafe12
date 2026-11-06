@@ -104,3 +104,8 @@ tr.click { cursor: pointer; } tr.click:hover td { background: #f7f9fc; } tr.sel 
 .drawer { display: grid; gap: 12px; max-width: 520px; }
 .notify { display: grid; gap: 8px; padding: 10px; border-radius: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; }
 .btn.wa { background: #25d366; border-color: #25d366; color: #fff; text-decoration: none; } a.btn { text-decoration: none; color: inherit; display: inline-block; }
+.mt0 { margin-top: 0; }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 160px; }
+.bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; min-width: 0; }
+.bar div { width: 100%; background: var(--brand); border-radius: 3px 3px 0 0; min-height: 1px; }
+.bar span { font-size: .6rem; color: var(--muted); }

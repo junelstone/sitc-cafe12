@@ -14,6 +14,7 @@ import Sessions from './pages/Sessions.jsx'
 import Stock from './pages/Stock.jsx'
 import Drawer from './pages/Drawer.jsx'
 import Expenses from './pages/Expenses.jsx'
+import Reports from './pages/Reports.jsx'
 
 export default function App() {
   const { session, profile, loading, isAdmin, signOut } = useAuth()
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="drawer" element={<Drawer />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="services" element={adminOnly(<Services />)} />
+        <Route path="reports" element={adminOnly(<Reports />)} />
         <Route path="staff" element={adminOnly(<Staff />)} />
         <Route path="settings" element={adminOnly(<Settings />)} />
         <Route path="*" element={<Navigate to="/" replace />} />
