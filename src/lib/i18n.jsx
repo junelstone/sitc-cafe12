@@ -2,6 +2,12 @@ import { createContext, useContext, useState } from 'react'
 
 const dict = {
   fr: {
+    nav_drawer: 'Clôture', nav_expenses: 'Dépenses',
+    drawer_title: 'Clôture de caisse', since: 'Depuis', opening_float: 'Fond de caisse (début)', cash_in: 'Ventes en espèces', cash_out: 'Dépenses en espèces',
+    expected: 'Attendu dans la caisse', counted: 'Montant compté', difference: 'Écart', close_drawer: 'Clôturer la caisse', drawer_ok: 'Caisse juste ✓',
+    drawer_short: 'Manque', drawer_over: 'Excédent', past_closes: 'Clôtures précédentes', momo_info: 'Mobile Money (hors caisse)', closed_ok: 'Caisse clôturée.',
+    add_expense: 'Ajouter une dépense', exp_rent: 'Loyer', exp_electricity: 'Électricité', exp_internet: 'Internet', exp_paper: 'Papier', exp_ink: 'Encre',
+    exp_salary: 'Salaires', exp_maintenance: 'Entretien', exp_transport: 'Transport', exp_other: 'Autre', pay_bank: 'Banque', delete: 'Supprimer', month: 'Mois',
     status: 'Statut', nav_jobs: 'Travaux', nav_sessions: 'Postes', nav_stock: 'Stock',
     new_job: 'Nouveau travail', job_no: 'N°', kind: 'Type', kind_typing: 'Saisie', kind_design: 'Conception', kind_printing: 'Impression', kind_other: 'Autre',
     description: 'Description', pages: 'Pages', due: 'À remettre le', paid: 'Payé', balance: 'Reste à payer', price_agreed: 'Prix convenu',
@@ -47,6 +53,12 @@ const dict = {
     add_item: 'Ajouter un article', language: 'Langue',
   },
   en: {
+    nav_drawer: 'Close till', nav_expenses: 'Expenses',
+    drawer_title: 'Close the cash drawer', since: 'Since', opening_float: 'Opening float', cash_in: 'Cash sales', cash_out: 'Cash expenses',
+    expected: 'Expected in drawer', counted: 'Counted amount', difference: 'Difference', close_drawer: 'Close the drawer', drawer_ok: 'Drawer balances ✓',
+    drawer_short: 'Short', drawer_over: 'Over', past_closes: 'Past closings', momo_info: 'Mobile Money (not in drawer)', closed_ok: 'Drawer closed.',
+    add_expense: 'Add an expense', exp_rent: 'Rent', exp_electricity: 'Electricity', exp_internet: 'Internet', exp_paper: 'Paper', exp_ink: 'Ink',
+    exp_salary: 'Salaries', exp_maintenance: 'Maintenance', exp_transport: 'Transport', exp_other: 'Other', pay_bank: 'Bank', delete: 'Delete', month: 'Month',
     status: 'Status', nav_jobs: 'Jobs', nav_sessions: 'Computers', nav_stock: 'Stock',
     new_job: 'New job', job_no: 'No.', kind: 'Type', kind_typing: 'Typing', kind_design: 'Design', kind_printing: 'Printing', kind_other: 'Other',
     description: 'Description', pages: 'Pages', due: 'Due', paid: 'Paid', balance: 'Balance due', price_agreed: 'Agreed price',
