@@ -12,7 +12,7 @@ export default function Layout() {
   return (
     <div className="shell">
       <header className="top no-print">
-        <div className="brand"><img className="logo" src="/logo.png" alt="Stone's IT Consulting" /><span>{t('appName')}</span></div>
+        <div className="brand"><img className="logo" src="/logo.png" alt="Stone's IT Consulting" /></div>
         <nav>{links.map(([to, k]) => <NavLink key={to} to={to} end>{t(k)}</NavLink>)}</nav>
         <div className="who">
           <InstallButton />

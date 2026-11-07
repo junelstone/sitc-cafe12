@@ -24,7 +24,7 @@ export default function Login() {
   return (
     <div className="center login-bg">
       <form className="card narrow" onSubmit={submit}>
-        <div className="row between"><div className="brand"><span>{t('appName')}</span></div><LangSwitch /></div>
+        <div className="row end"><LangSwitch /></div>
         <img className="login-logo" src="/logo.png" alt="" />
         <h1>{t('signInTitle')}</h1>
         {!configured && <p className="alert">{t('notConfigured')}</p>}
