@@ -70,7 +70,7 @@ export default function Reports() {
         H([t('by_service'), t('qty'), t('total')]), ...byService.map((r) => [label(r.k), r.q, r.total]), [],
         H([t('by_staff'), t('sales_count'), t('total')]), ...byStaff.map((r) => [r.k, r.n, r.total])] },
       { sheet: t('sales_count'), data: [H([t('receipt_no'), t('date'), t('cashier'), t('customer').split(' (')[0], t('pay_cash') + '/' + t('pay_momo'), 'Ref', t('total'), t('voided')]),
-        ...sales.map((s) => [s.receipt_no, dt(s.created_at), s.staff?.full_name || '', s.customer_name, payName(s.payment_method), s.momo_ref, s.total, s.voided ? 'X' : ''])] },
+        ...sales.map((s) => [s.number ?? s.receipt_no, dt(s.created_at), s.staff?.full_name || '', s.customer_name, payName(s.payment_method), s.momo_ref, s.total, s.voided ? 'X' : ''])] },
       { sheet: t('nav_expenses'), data: [H([t('date'), t('category'), t('description'), t('amount'), t('cashier')]),
         ...expenses.map((e) => [e.spent_on, t('exp_' + e.category), e.description, e.amount, e.staff?.full_name || ''])] },
     ]).toFile(`SITC-rapport-${month}.xlsx`)

@@ -65,7 +65,7 @@ export default function Report() {
           <thead><tr><th>{t('receipt_no')}</th><th>{t('time')}</th><th>{t('cashier')}</th><th>{t('pay_cash')}/{t('pay_momo')}</th><th className="num">{t('total')}</th><th></th></tr></thead>
           <tbody>{sales.map((s) => (
             <tr key={s.id} className={s.voided ? 'dim' : ''}>
-              <td><a href="#" onClick={(e) => { e.preventDefault(); setOpen(s.id) }}>{String(s.receipt_no).padStart(6, '0')}</a>{s.voided && <span className="pill warnpill">{t('voided')}</span>}</td>
+              <td><a href="#" onClick={(e) => { e.preventDefault(); setOpen(s.id) }}>{String(s.number ?? s.receipt_no).padStart(6, '0')}</a>{s.voided && <span className="pill warnpill">{t('voided')}</span>}</td>
               <td>{new Date(s.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
               <td>{s.staff?.full_name}</td>
               <td>{s.payment_method === 'cash' ? t('pay_cash') : s.payment_method === 'account' ? t('pay_account') : `${t('pay_momo')} · ${s.momo_ref}`}</td>

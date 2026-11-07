@@ -25,7 +25,7 @@ export default function Customers() {
     setRows(data || [])
     if (sel) { const s = (data || []).find((c) => c.id === sel.id); setSel(s || null); if (s) loadHist(s.id) }
   }
-  const loadHist = (id) => supabase.from('account_entries').select('*, sale:sales(receipt_no), staff:profiles(full_name)').eq('customer_id', id).order('created_at', { ascending: false }).limit(50).then(({ data }) => setHist(data || []))
+  const loadHist = (id) => supabase.from('account_entries').select('*, sale:sales(number), staff:profiles(full_name)').eq('customer_id', id).order('created_at', { ascending: false }).limit(50).then(({ data }) => setHist(data || []))
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save(e) {
@@ -94,7 +94,7 @@ export default function Customers() {
             <h3>{t('history')}</h3>
             <div className="hist">{hist.map((h) => (
               <div key={h.id} className="row between small">
-                <span>{new Date(h.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB')} · {t('ae_' + h.kind)}{h.sale?.receipt_no && ` #${h.sale.receipt_no}`}</span>
+                <span>{new Date(h.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB')} · {t('ae_' + h.kind)}{h.sale?.number && ` #${h.sale.number}`}</span>
                 <b className={h.change < 0 ? 'warn' : 'ok'}>{h.change > 0 ? '+' : ''}{fcfa(h.change)}</b>
               </div>))}</div>
           </aside>

@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { fcfa } from '../lib/format'
 import { errText } from '../lib/errors'
 import PayBox from '../components/PayBox.jsx'
+import { useBusiness } from '../lib/business.jsx'
 import { intlPhone, readyMessage, smsUrl, whatsappUrl } from '../lib/notify'
 import Receipt from '../components/Receipt.jsx'
 
@@ -24,8 +25,7 @@ export default function Jobs() {
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [receipt, setReceipt] = useState(null)
-  const [biz, setBiz] = useState(null)
-  useEffect(() => { supabase.from('settings').select('business_name').single().then(({ data }) => setBiz(data)) }, [])
+  const { biz } = useBusiness()
 
   async function load() {
     let qy = supabase.from('jobs').select('*').order('created_at', { ascending: false }).limit(300)
@@ -55,7 +55,7 @@ export default function Jobs() {
     setPayAmt(''); setMsg(''); load(); setReceipt(data.id)
   }
 
-  const shown = jobs.filter((j) => `${j.job_no} ${j.customer_name} ${j.customer_phone} ${j.description}`.toLowerCase().includes(q.toLowerCase()))
+  const shown = jobs.filter((j) => `${j.number ?? j.job_no} ${j.customer_name} ${j.customer_phone} ${j.description}`.toLowerCase().includes(q.toLowerCase()))
   const fmtDate = (d) => d ? new Date(d).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
   const isLate = (j) => j.due_at && new Date(j.due_at) < new Date() && !['collected', 'cancelled', 'ready'].includes(j.status)
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
@@ -90,7 +90,7 @@ export default function Jobs() {
           <thead><tr><th>{t('job_no')}</th><th>{t('customer').split(' (')[0]}</th><th>{t('status')}</th><th>{t('due')}</th><th className="num">{t('balance')}</th></tr></thead>
           <tbody>{shown.map((j) => (
             <tr key={j.id} className={'click ' + (sel?.id === j.id ? 'sel ' : '') + (j.status === 'cancelled' ? 'dim' : '')} onClick={() => { setSel(j); setPayAmt(''); setForm(null) }}>
-              <td><b>{j.job_no}</b></td>
+              <td><b>{j.number ?? j.job_no}</b></td>
               <td>{j.customer_name}<div className="muted small">{t('kind_' + j.kind)}{j.pages ? ` · ${j.pages} p.` : ''}</div></td>
               <td><span className={'pill st-' + j.status}>{t('st_' + j.status)}</span>{isLate(j) && <span className="pill warnpill">{t('late')}</span>}{j.status === 'ready' && j.notified_at && <span title={t('notified')}> 💬</span>}</td>
               <td className="small">{fmtDate(j.due_at)}</td>
@@ -100,7 +100,7 @@ export default function Jobs() {
 
         {sel && (
           <aside className="card job-detail">
-            <div className="row between"><h2>{t('job_no')} {sel.job_no}</h2><button className="btn ghost small" onClick={() => setSel(null)}>✕</button></div>
+            <div className="row between"><h2>{t('job_no')} {sel.number ?? sel.job_no}</h2><button className="btn ghost small" onClick={() => setSel(null)}>✕</button></div>
             <p><b>{sel.customer_name}</b>{sel.customer_phone && <> · <a href={'tel:' + sel.customer_phone}>{sel.customer_phone}</a></>}</p>
             {sel.description && <p className="muted">{sel.description}</p>}
             <div className="steps">{FLOW.map((s, i) => (

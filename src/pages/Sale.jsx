@@ -6,10 +6,12 @@ import { fcfa, num } from '../lib/format'
 import { errText } from '../lib/errors'
 import { cacheServices, cachedServices, enqueue, isNetworkError, newRef } from '../lib/offline'
 import Receipt from '../components/Receipt.jsx'
+import { useBusiness } from '../lib/business.jsx'
 
 export default function Sale() {
   const { t, lang } = useI18n()
   const { isAdmin, profile } = useAuth()
+  const { biz } = useBusiness()
   const [services, setServices] = useState(cachedServices())
   const [cat, setCat] = useState('all')
   const [q, setQ] = useState('')
@@ -88,7 +90,7 @@ export default function Sale() {
     <section><h1>{t('receipt')}</h1>
       <div className="receipt-wrap">
         <div className="receipt" id="receipt">
-          <div className="r-head"><img className="r-logo" src="/logo.png" alt="" /><b>Stone's IT Consulting</b></div>
+          <div className="r-head">{biz?.logo_url && <img className="r-logo" src={biz.logo_url} alt="" />}<b>{biz?.name}</b></div>
           <div className="r-void">{t('provisional_receipt')}</div>
           <div className="r-meta"><div><span>Ref</span><span>{offlineDone.client_ref.slice(0, 8).toUpperCase()}</span></div>
             <div><span>{t('date')}</span><span>{new Date(offlineDone.created_at).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB')}</span></div>

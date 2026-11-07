@@ -2,18 +2,19 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n.jsx'
 import { fcfa, num } from '../lib/format'
+import { useBusiness } from '../lib/business.jsx'
 
 // Loads a sale and shows a printable receipt. Bilingual labels are printed on the ticket.
 export default function Receipt({ saleId, onClose }) {
   const { t, lang } = useI18n()
+  const { biz } = useBusiness()
   const [data, setData] = useState(null)
 
   useEffect(() => {
     Promise.all([
       supabase.from('sales').select('*, staff:profiles(full_name)').eq('id', saleId).single(),
       supabase.from('sale_items').select('*').eq('sale_id', saleId),
-      supabase.from('settings').select('*').single(),
-    ]).then(([s, i, st]) => setData({ sale: s.data, items: i.data || [], biz: st.data }))
+    ]).then(([s, i]) => setData({ sale: s.data, items: i.data || [] }))
   }, [saleId])
 
   function print(small) {
@@ -21,16 +22,16 @@ export default function Receipt({ saleId, onClose }) {
     window.print()
   }
   if (!data?.sale) return <div className="card">…</div>
-  const { sale, items, biz } = data
+  const { sale, items } = data
   const label = (l) => { const [fr, en] = l.split(' / '); return lang === 'fr' ? fr : (en || fr) }
   const when = new Date(sale.created_at).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB')
 
   return (
     <div className="receipt-wrap">
       <div className="receipt" id="receipt">
-        <div className="r-head"><img className="r-logo" src="/logo.png" alt="" /><b>{biz?.business_name}</b><div>{biz?.address}</div><div>{biz?.phone} · {biz?.email}</div></div>
+        <div className="r-head">{biz?.logo_url && <img className="r-logo" src={biz.logo_url} alt="" />}<b>{biz?.name}</b><div>{biz?.address}</div><div>{biz?.phone} · {biz?.email}</div></div>
         <div className="r-meta">
-          <div><span>{t('receipt_no')}</span><b>{String(sale.receipt_no).padStart(6, '0')}</b></div>
+          <div><span>{t('receipt_no')}</span><b>{String(sale.number ?? sale.receipt_no).padStart(6, '0')}</b></div>
           <div><span>{t('date')}</span><span>{when}</span></div>
           <div><span>{t('cashier')}</span><span>{sale.staff?.full_name}</span></div>
           {sale.customer_name && <div><span>{t('customer').split(' (')[0]}</span><span>{sale.customer_name}</span></div>}

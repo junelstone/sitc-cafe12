@@ -9,11 +9,11 @@ export function intlPhone(raw) {
 }
 
 export function readyMessage(job, biz, balance) {
-  const name = biz?.business_name || "Stone's IT Consulting"
+  const name = biz?.name || ''
   const due = balance > 0 ? ` Reste à payer : ${new Intl.NumberFormat('fr-FR').format(balance)} F CFA.` : ''
   const dueEn = balance > 0 ? ` Balance due: ${new Intl.NumberFormat('fr-FR').format(balance)} F CFA.` : ''
-  return `Bonjour ${job.customer_name}, votre travail N°${job.job_no} est prêt chez ${name}.${due} Merci !\n` +
-    `Hello ${job.customer_name}, your job No.${job.job_no} is ready at ${name}.${dueEn} Thank you!`
+  return `Bonjour ${job.customer_name}, votre travail N°${job.number ?? job.job_no} est prêt chez ${name}.${due} Merci !\n` +
+    `Hello ${job.customer_name}, your job No.${job.number ?? job.job_no} is ready at ${name}.${dueEn} Thank you!`
 }
 
 export const whatsappUrl = (phone, text) => `https://wa.me/${intlPhone(phone)}?text=${encodeURIComponent(text)}`

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { I18nProvider } from './lib/i18n.jsx'
 import { AuthProvider } from './lib/auth.jsx'
+import { BusinessProvider } from './lib/business.jsx'
 import './styles.css'
 
 createRoot(document.getElementById('root')).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <I18nProvider>
         <AuthProvider>
-          <App />
+          <BusinessProvider>
+            <App />
+          </BusinessProvider>
         </AuthProvider>
       </I18nProvider>
     </BrowserRouter>

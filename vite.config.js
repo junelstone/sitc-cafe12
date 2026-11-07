@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'SITC Cyber Café',
+        name: 'SITC Café Manager',
         short_name: 'SITC Café',
         description: "Gestion du cyber café · Stone's IT Consulting",
         lang: 'fr',

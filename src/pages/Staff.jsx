@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth.jsx'
 import { useI18n } from '../lib/i18n.jsx'
+import { errText } from '../lib/errors'
 
 export default function Staff() {
   const { t } = useI18n()
@@ -22,7 +23,7 @@ export default function Staff() {
     e.preventDefault()
     const { data, error } = await supabase.functions.invoke('create-staff', { body: form })
     const err = error ? (await error.context?.json?.().catch(() => null))?.error || error.message : data?.error
-    setMsg(err ? `${t('error')}: ${err}` : t('staff_created'))
+    setMsg(err ? errText(t, err) : t('staff_created'))
     if (!err) { setForm(null); load() }
   }
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })

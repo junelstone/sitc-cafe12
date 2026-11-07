@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { useI18n } from '../lib/i18n.jsx'
 import { configured } from '../lib/supabase'
@@ -24,7 +25,7 @@ export default function Login() {
   return (
     <div className="center login-bg">
       <form className="card narrow" onSubmit={submit}>
-        <div className="row end"><LangSwitch /></div>
+        <div className="row between"><Link to="/" className="small">← {t('back')}</Link><LangSwitch /></div>
         <img className="login-logo" src="/logo.png" alt="" />
         <h1>{t('signInTitle')}</h1>
         {!configured && <p className="alert">{t('notConfigured')}</p>}
@@ -33,7 +34,7 @@ export default function Login() {
         {err && <p className="alert">{err}</p>}
         <button className="btn primary full" disabled={busy || !configured}>{t('signIn')}</button>
         <div className="row" style={{ justifyContent: 'center' }}><InstallButton /></div>
-        <p className="muted small center-text">Stone's IT Consulting · Brazzaville</p>
+        <p className="muted small center-text">{t('no_account')} <Link to="/signup">{t('start_trial')}</Link></p>
       </form>
     </div>
   )
