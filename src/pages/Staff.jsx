@@ -12,6 +12,8 @@ export default function Staff() {
   const [rows, setRows] = useState([])
   const [form, setForm] = useState(null)
   const [msg, setMsg] = useState('')
+  const [emails, setEmails] = useState({})   // staff_id -> login email
+  const [pw, setPw] = useState(null)          // { id, password } while resetting
 
   const { lang } = useI18n()
   const [day, setDay] = useState(today())
@@ -29,7 +31,10 @@ export default function Staff() {
     setVisits(v.data || [])
     const m = {}; (l.data || []).forEach((r) => { if (!m[r.staff_id]) m[r.staff_id] = r }); setLatest(m)
   }
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    supabase.rpc('staff_logins').then(({ data }) => { const m = {}; (data || []).forEach((r) => { m[r.id] = r.email }); setEmails(m) })
+  }, [])
   useEffect(() => { loadPresence(); const h = setInterval(() => { loadPresence(); tick((n) => n + 1) }, 30000); return () => clearInterval(h) }, [day]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loc = lang === 'fr' ? 'fr-FR' : 'en-GB'
@@ -55,6 +60,13 @@ export default function Staff() {
     setMsg(error ? `${t('error')}: ${error.message}` : t('saved')); load()
   }
 
+  async function resetPw(e) {
+    e.preventDefault()
+    const { error } = await supabase.rpc('reset_staff_password', { p_staff: pw.id, p_password: pw.password })
+    setMsg(error ? errText(t, error) : `${t('pw_changed')} ${name(pw.id)} (${emails[pw.id] || ''})`)
+    if (!error) setPw(null)
+  }
+
   async function create(e) {
     e.preventDefault()
     const { data, error } = await supabase.functions.invoke('create-staff', { body: form })
@@ -78,11 +90,20 @@ export default function Staff() {
           <div className="row end span2"><button type="button" className="btn ghost" onClick={() => setForm(null)}>{t('cancel')}</button><button className="btn primary">{t('add')}</button></div>
         </form>
       )}
+      {pw && (
+        <form className="card grid2" onSubmit={resetPw}>
+          <p className="span2"><b>🔑 {t('reset_pw')}: {name(pw.id)}</b><br /><span className="muted small">{t('login_email')}: {emails[pw.id]}</span></p>
+          <label>{t('new_password')}<input type="text" required minLength={8} value={pw.password} onChange={(e) => setPw({ ...pw, password: e.target.value })} placeholder={t('pw_hint')} /></label>
+          <div className="row end span2"><button type="button" className="btn ghost" onClick={() => setPw(null)}>{t('cancel')}</button><button className="btn primary">{t('save')}</button></div>
+        </form>
+      )}
       <div className="card flush"><table>
         <thead><tr><th>{t('full_name')}</th><th>{t('role')}</th><th>{t('status')}</th><th>{t('active')}</th></tr></thead>
         <tbody>{rows.map((r) => { const self = r.id === me.id; return (
           <tr key={r.id} className={r.active ? '' : 'dim'}>
-            <td><b>{r.full_name}</b>{self && <span className="muted small"> ({t('you')})</span>}</td>
+            <td><b>{r.full_name}</b>{self && <span className="muted small"> ({t('you')})</span>}
+              {emails[r.id] && <div className="muted small">{t('login_email')}: {emails[r.id]}</div>}
+              {!self && <button type="button" className="btn ghost small" onClick={() => setPw({ id: r.id, password: '' })}>🔑 {t('reset_pw')}</button>}</td>
             <td><select value={r.role} disabled={self} onChange={(e) => update(r.id, { role: e.target.value })}><option value="staff">{t('role_staff')}</option><option value="admin">{t('role_admin')}</option></select></td>
             <td>{status(r.id)}</td>
             <td><input type="checkbox" checked={r.active} disabled={self} onChange={(e) => update(r.id, { active: e.target.checked })} /></td>
