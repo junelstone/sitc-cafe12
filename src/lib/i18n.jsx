@@ -4,6 +4,7 @@ const dict = {
   fr: {
     nav_subscription: "Abonnement",
     nav_platform: "Mes clients (plateforme)",
+    grp_sales: 'Ventes', grp_cash: 'Caisse', grp_manage: 'Gestion',
     change_logo: "Changer le logo",
     city: "Ville",
     currency: "Monnaie",
@@ -176,6 +177,7 @@ const dict = {
   en: {
     nav_subscription: "Subscription",
     nav_platform: "My clients (platform)",
+    grp_sales: 'Sales', grp_cash: 'Cash', grp_manage: 'Management',
     change_logo: "Change logo",
     city: "City",
     currency: "Currency",

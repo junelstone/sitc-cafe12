@@ -37,9 +37,23 @@ input:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--brand) 3
 .seg button.on { background: var(--brand); color: #fff; }
 .shell { min-height: 100vh; }
 .top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
-.top nav { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
-.top nav a { padding: 8px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 600; white-space: nowrap; }
-.top nav a.active { background: #e8f0fb; color: var(--brand); }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; position: relative; }
+.top nav > a, .dd-btn { font: inherit; padding: 8px 12px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); text-decoration: none; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.top nav > a:hover, .dd-btn:hover { color: var(--brand); }
+.top nav > a.active, .dd-btn.active { background: #e8f0fb; color: var(--brand); }
+.dd { position: relative; }
+.dd-btn .caret { font-size: .75em; display: inline-block; transition: transform .15s; }
+.dd.open .dd-btn { color: var(--brand); } .dd.open .caret { transform: rotate(180deg); }
+.dd-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; min-width: 200px; display: grid; gap: 2px; padding: 6px; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 10px; box-shadow: 0 10px 28px rgba(16,24,40,.14); }
+.dd-menu a { padding: 10px 12px; border-radius: 8px; color: var(--text); text-decoration: none; font-weight: 600; white-space: nowrap; }
+.dd-menu a:hover { background: #f2f6fc; color: var(--brand); }
+.dd-menu a.active { background: #e8f0fb; color: var(--brand); }
+@media (max-width: 640px) {
+  .top nav { order: 3; flex-basis: 100%; }
+  .dd { position: static; }
+  .dd-menu { left: 0; right: 0; min-width: 0; }
+  .dd-menu a { padding: 12px 14px; }
+}
 .who { display: flex; align-items: center; gap: 10px; }
 main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
 table { width: 100%; border-collapse: collapse; } th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); }
