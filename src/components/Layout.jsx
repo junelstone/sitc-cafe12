@@ -22,6 +22,15 @@ export default function Layout({ locked = false }) {
   const navRef = useRef(null)
   const [lowCount, setLowCount] = useState(0)
 
+  // Presence: tell the server this person is using the app (every minute while the page is open).
+  useEffect(() => {
+    const ping = () => { if (document.visibilityState === 'visible') supabase.rpc('presence_ping', { page: window.location.pathname }).then(() => {}, () => {}) }
+    ping()
+    const h = setInterval(ping, 60000)
+    document.addEventListener('visibilitychange', ping)
+    return () => { clearInterval(h); document.removeEventListener('visibilitychange', ping) }
+  }, [])
+
   // Number of stock items at or below their alert level, shown as a badge on Stock.
   useEffect(() => {
     if (locked) return

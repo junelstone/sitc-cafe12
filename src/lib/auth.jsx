@@ -26,7 +26,11 @@ export function AuthProvider({ children }) {
     session, profile, loading: session === undefined || (session && !profile),
     isAdmin: profile?.role === 'admin' && profile?.active,
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
-    signOut: () => supabase.auth.signOut(),
+    signOut: async () => {
+      // Record the sign-out time for the admin's presence log (ignore errors, e.g. offline).
+      try { await supabase.rpc('presence_end') } catch { /* offline */ }
+      return supabase.auth.signOut()
+    },
   }
   return <Auth.Provider value={value}>{children}</Auth.Provider>
 }
