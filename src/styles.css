@@ -191,3 +191,4 @@ table.inner { width: 100%; font-size: .88rem; }
 .menu-line .dots { flex: 1; }
 .menu-line b { white-space: nowrap; }
 .menu-page .center { min-height: 0; }
+.compact th, .compact td { padding: 10px 10px; } .compact { font-size: .92rem; }

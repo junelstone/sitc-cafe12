@@ -78,9 +78,9 @@ export default function Cashiers() {
           <div className="kpi"><span>📱 {t('pay_momo')}</span><b>{fcfa(sum('momo'))}</b></div>
           <div className="kpi"><span>{t('drawer_short')}</span><b className={sum('short_total') ? 'warn' : ''}>{fcfa(sum('short_total'))}</b></div>
         </div>
-        <div className="card flush scroll-x"><table>
+        <div className="card flush scroll-x"><table className="compact">
           <thead><tr><th>{t('cashier')}</th><th className="num">{t('sales_count')}</th><th className="num">{t('total')}</th><th className="num">💵</th><th className="num">📱</th>
-            <th className="num">{t('discount')}</th><th className="num">{t('voided')}</th><th className="num">{t('cash_out')}</th><th className="num">{t('closes')}</th><th className="num">{t('difference')}</th><th>{t('hours')}</th></tr></thead>
+            <th className="num">{t('discount')}</th><th className="num">{t('voided')}</th><th className="num">{t('nav_expenses')}</th><th className="num">{t('closes')}</th></tr></thead>
           <tbody>{rows.map((r) => (
             <FragmentRow key={r.staff_id} r={r} open={open === r.staff_id} onClick={() => toggle(r)} closes={closes} t={t} dt={dt} time={time} diff={diff} />
           ))}</tbody>
@@ -96,7 +96,7 @@ function FragmentRow({ r, open, onClick, closes, t, dt, time, diff }) {
   return (
     <>
       <tr className={'click ' + (open ? 'sel' : '')} onClick={onClick}>
-        <td><b>{r.full_name}</b> <span className="pill">{t('role_' + r.role)}</span></td>
+        <td><b>{r.full_name}</b> <span className="pill">{t('role_' + r.role)}</span>{r.first_sale && <div className="muted small">🕒 {time(r.first_sale)} – {time(r.last_sale)}</div>}</td>
         <td className="num">{r.sales_count}</td>
         <td className="num"><b>{fcfa(r.total)}</b></td>
         <td className="num">{fcfa(r.cash)}</td>
@@ -104,12 +104,10 @@ function FragmentRow({ r, open, onClick, closes, t, dt, time, diff }) {
         <td className="num">{Number(r.discounts) ? fcfa(r.discounts) : '—'}</td>
         <td className="num">{Number(r.voided_count) ? <span className="warn">{r.voided_count} · {fcfa(r.voided_total)}</span> : '—'}</td>
         <td className="num">{Number(r.expenses_cash) ? fcfa(r.expenses_cash) : '—'}</td>
-        <td className="num">{r.closes}</td>
-        <td className="num">{Number(r.closes) ? diff(net) : '—'}</td>
-        <td className="small">{time(r.first_sale)} – {time(r.last_sale)}</td>
+        <td className="num">{Number(r.closes) ? <>{r.closes} · {diff(net)}</> : '—'}</td>
       </tr>
       {open && (
-        <tr className="sub"><td colSpan={11}>
+        <tr className="sub"><td colSpan={9}>
           {!closes.length ? <span className="muted small">{t('no_closes')}</span> : (
             <table className="inner"><thead><tr><th>{t('date')}</th><th className="num">{t('expected')}</th><th className="num">{t('counted')}</th><th className="num">{t('difference')}</th><th>{t('note')}</th></tr></thead>
               <tbody>{closes.map((c) => (
