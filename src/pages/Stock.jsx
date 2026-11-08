@@ -4,6 +4,9 @@ import { useI18n } from '../lib/i18n.jsx'
 import { useAuth } from '../lib/auth.jsx'
 import { num } from '../lib/format'
 import { errText } from '../lib/errors'
+import { useBusiness } from '../lib/business.jsx'
+import { isLow, restockList } from '../lib/summary'
+import SendOwner from '../components/SendOwner.jsx'
 
 export default function Stock() {
   const { t, lang } = useI18n()
@@ -14,6 +17,7 @@ export default function Stock() {
   const [qty, setQty] = useState('')
   const [note, setNote] = useState('')
   const [msg, setMsg] = useState('')
+  const { biz } = useBusiness()
 
   async function load() {
     const [a, b] = await Promise.all([
@@ -30,12 +34,19 @@ export default function Stock() {
     setMsg(error ? errText(t, error) : t('saved'))
     if (!error) { setAct(null); setQty(''); setNote(''); load() }
   }
-  const low = (i) => Number(i.quantity) <= Number(i.low_threshold)
+  const low = isLow
+  const lowItems = items.filter(isLow)
 
   return (
     <section>
       <h1>{t('nav_stock')}</h1>
       {msg && <p className="note">{msg}</p>}
+      {lowItems.length > 0 && (
+        <div className="alert block low-box">
+          <div>⚠️ <b>{lowItems.length} {t('items_low')}</b>: {lowItems.map((i) => i.name).join(', ')}</div>
+          <SendOwner small text={restockList({ biz, low: lowItems, t })} label={t('send_restock')} />
+        </div>
+      )}
       <div className="stock-grid">
         {items.map((i) => (
           <div key={i.id} className={'card stock-card ' + (low(i) ? 'low' : '')}>

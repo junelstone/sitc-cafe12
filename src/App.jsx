@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './lib/auth.jsx'
 import { useI18n } from './lib/i18n.jsx'
 import Layout from './components/Layout.jsx'
@@ -21,13 +21,18 @@ import Landing from './pages/Landing.jsx'
 import Signup from './pages/Signup.jsx'
 import Subscription from './pages/Subscription.jsx'
 import Platform from './pages/Platform.jsx'
+import Cashiers from './pages/Cashiers.jsx'
+import Menu from './pages/Menu.jsx'
 import { useBusiness } from './lib/business.jsx'
 
 export default function App() {
   const { session, profile, loading, isAdmin, signOut } = useAuth()
   const { t } = useI18n()
   const { biz, access, isPlatform } = useBusiness()
+  const { pathname } = useLocation()
 
+  // Public price list (QR code): works signed in or not.
+  if (pathname.startsWith('/menu/')) return <Routes><Route path="menu/:id" element={<Menu />} /></Routes>
   if (loading) return <div className="center muted">…</div>
   if (!session) return (
     <Routes>
@@ -76,6 +81,7 @@ export default function App() {
         <Route path="expenses" element={<Expenses />} />
         <Route path="services" element={adminOnly(<Services />)} />
         <Route path="reports" element={adminOnly(pro(<Reports />))} />
+        <Route path="cashiers" element={adminOnly(pro(<Cashiers />))} />
         <Route path="staff" element={adminOnly(<Staff />)} />
         <Route path="settings" element={adminOnly(<Settings />)} />
         <Route path="subscription" element={adminOnly(<Subscription />)} />

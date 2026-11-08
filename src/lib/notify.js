@@ -16,5 +16,9 @@ export function readyMessage(job, biz, balance) {
     `Hello ${job.customer_name}, your job No.${job.number ?? job.job_no} is ready at ${name}.${dueEn} Thank you!`
 }
 
+// With no valid number, WhatsApp opens and lets the user pick the contact.
 export const whatsappUrl = (phone, text) => `https://wa.me/${intlPhone(phone)}?text=${encodeURIComponent(text)}`
 export const smsUrl = (phone, text) => `sms:+${intlPhone(phone)}?body=${encodeURIComponent(text)}`
+
+// The number that receives owner summaries: the WhatsApp number in Settings, else the café phone.
+export const ownerPhone = (biz) => biz?.owner_whatsapp || biz?.phone || ''

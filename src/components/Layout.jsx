@@ -8,8 +8,10 @@ import TrialBanner from './TrialBanner.jsx'
 import { useBusiness } from '../lib/business.jsx'
 import OfflineBar from './OfflineBar.jsx'
 import InstallButton from './InstallButton.jsx'
+import { supabase } from '../lib/supabase'
+import { isLow } from '../lib/summary'
 
-const PRO_ONLY = ['/customers', '/vouchers', '/reports']
+const PRO_ONLY = ['/customers', '/vouchers', '/reports', '/cashiers']
 
 export default function Layout({ locked = false }) {
   const { profile, isAdmin, signOut } = useAuth()
@@ -18,6 +20,14 @@ export default function Layout({ locked = false }) {
   const { pathname } = useLocation()
   const [open, setOpen] = useState(null)
   const navRef = useRef(null)
+  const [lowCount, setLowCount] = useState(0)
+
+  // Number of stock items at or below their alert level, shown as a badge on Stock.
+  useEffect(() => {
+    if (locked) return
+    supabase.from('stock_items').select('quantity, low_threshold').eq('active', true)
+      .then(({ data }) => setLowCount((data || []).filter(isLow).length))
+  }, [pathname, locked])
 
   // Close the open menu after a page change, a click elsewhere, or Escape.
   useEffect(() => { setOpen(null) }, [pathname])
@@ -37,7 +47,7 @@ export default function Layout({ locked = false }) {
         { to: '/', k: 'nav_home' },
         { k: 'grp_sales', items: [['/sale', 'nav_sale'], ['/jobs', 'nav_jobs'], ['/sessions', 'nav_sessions'], ['/vouchers', 'nav_vouchers'], ['/customers', 'nav_customers']] },
         { k: 'grp_cash', items: [['/report', 'nav_report'], ['/drawer', 'nav_drawer'], ['/expenses', 'nav_expenses']] },
-        { k: 'grp_manage', items: [['/stock', 'nav_stock'], ...(isAdmin ? [['/reports', 'nav_reports'], ['/services', 'nav_services'], ['/staff', 'nav_staff'], ['/settings', 'nav_settings'], ['/subscription', 'nav_subscription']] : [])] },
+        { k: 'grp_manage', items: [['/stock', 'nav_stock'], ...(isAdmin ? [['/reports', 'nav_reports'], ['/cashiers', 'nav_cashiers'], ['/services', 'nav_services'], ['/staff', 'nav_staff'], ['/settings', 'nav_settings'], ['/subscription', 'nav_subscription']] : [])] },
         ...(isPlatform ? [{ to: '/platform', k: 'nav_platform' }] : []),
       ]
 
@@ -56,11 +66,11 @@ export default function Layout({ locked = false }) {
               <div key={g.k} className={'dd' + (isOpen ? ' open' : '')}>
                 <button type="button" className={'dd-btn' + (here ? ' active' : '')} aria-haspopup="true" aria-expanded={isOpen}
                   onClick={() => setOpen(isOpen ? null : g.k)}>
-                  {t(g.k)} <span className="caret" aria-hidden="true">▾</span>
+                  {t(g.k)}{g.k === 'grp_manage' && lowCount > 0 && <span className="badge" title={t('low_stock')}>{lowCount}</span>} <span className="caret" aria-hidden="true">▾</span>
                 </button>
                 {isOpen && (
                   <div className="dd-menu" role="menu">
-                    {items.map(([to, k]) => <NavLink key={to} to={to} end role="menuitem">{t(k)}</NavLink>)}
+                    {items.map(([to, k]) => <NavLink key={to} to={to} end role="menuitem">{t(k)}{to === '/stock' && lowCount > 0 && <span className="badge">{lowCount}</span>}</NavLink>)}
                   </div>
                 )}
               </div>

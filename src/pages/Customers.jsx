@@ -6,6 +6,7 @@ import { fcfa } from '../lib/format'
 import { errText } from '../lib/errors'
 import PayBox from '../components/PayBox.jsx'
 import Receipt from '../components/Receipt.jsx'
+import { useBusiness } from '../lib/business.jsx'
 
 export default function Customers() {
   const { t, lang } = useI18n()
@@ -19,6 +20,8 @@ export default function Customers() {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
   const [receipt, setReceipt] = useState(null)
+  const { biz } = useBusiness()
+  const loyalty = biz?.plan === 'pro' && biz?.loyalty_enabled
 
   async function load() {
     const { data } = await supabase.from('customers').select('*').order('name').limit(500)
@@ -30,7 +33,7 @@ export default function Customers() {
 
   async function save(e) {
     e.preventDefault()
-    const { id, balance, created_at, ...rest } = form // eslint-disable-line no-unused-vars
+    const { id, balance, points, created_at, ...rest } = form // eslint-disable-line no-unused-vars
     const body = { ...rest, credit_limit: parseInt(rest.credit_limit, 10) || 0 }
     const { error } = id ? await supabase.from('customers').update(body).eq('id', id) : await supabase.from('customers').insert(body)
     setMsg(error ? errText(t, error) : t('saved'))
@@ -70,11 +73,12 @@ export default function Customers() {
       )}
       <div className={sel ? 'split' : ''}>
         <div className="card flush"><table>
-          <thead><tr><th>{t('full_name')}</th><th>{t('customer_phone')}</th><th className="num">{t('balance_short')}</th></tr></thead>
+          <thead><tr><th>{t('full_name')}</th><th>{t('customer_phone')}</th>{loyalty && <th className="num">⭐ {t('points')}</th>}<th className="num">{t('balance_short')}</th></tr></thead>
           <tbody>{shown.map((c) => (
             <tr key={c.id} className={'click ' + (sel?.id === c.id ? 'sel ' : '') + (c.active ? '' : 'dim')} onClick={() => open(c)}>
               <td><b>{c.name}</b>{c.kind === 'business' && <span className="pill">{t('business_kind')}</span>}</td>
               <td className="small">{c.phone}</td>
+              {loyalty && <td className="num">{c.points || 0}</td>}
               <td className={'num ' + (c.balance < 0 ? 'warn' : c.balance > 0 ? 'ok' : '')}>{fcfa(c.balance)}</td>
             </tr>))}</tbody>
         </table></div>
@@ -84,6 +88,7 @@ export default function Customers() {
             {sel.phone && <a href={'tel:' + sel.phone}>{sel.phone}</a>}
             <div className="row between big"><span>{t('balance_short')}</span><span className={sel.balance < 0 ? 'warn' : 'ok'}>{fcfa(sel.balance)}</span></div>
             <p className="muted small">{sel.balance < 0 ? t('owes') : t('prepaid')} · {t('credit_limit')} {fcfa(sel.credit_limit)}</p>
+            {loyalty && <div className="row between"><span>⭐ {t('points')}</span><b>{sel.points || 0} <span className="muted small">(= {fcfa((sel.points || 0) * (biz.loyalty_value || 0))})</span></b></div>}
             {isAdmin && <button className="btn ghost small" onClick={() => setForm(sel)}>{t('edit')}</button>}
             <div className="paywrap">
               <h3>{sel.balance < 0 ? t('pay_debt') : t('add_credit')}</h3>

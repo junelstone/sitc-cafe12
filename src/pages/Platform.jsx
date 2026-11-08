@@ -4,6 +4,23 @@ import { fcfa } from '../lib/format'
 import { errText } from '../lib/errors'
 import { useI18n } from '../lib/i18n.jsx'
 import { useBusiness } from '../lib/business.jsx'
+import { whatsappUrl, smsUrl, intlPhone } from '../lib/notify'
+import { PAY_NUMBER } from './Subscription.jsx'
+
+const DAY = 86400000
+
+// Bilingual reminder sent to a café owner before (or just after) the plan ends.
+function reminderText(c, endDate, price) {
+  const fr = endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+  const en = endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+  const past = endDate < new Date()
+  const amt = new Intl.NumberFormat('fr-FR').format(price || 0)
+  const who = c.owner_name || c.name
+  return `Bonjour ${who}, l\u2019abonnement SITC Café Manager de ${c.name} ${past ? 's\u2019est terminé' : 'se termine'} le ${fr}. ` +
+    `Pour continuer, envoyez ${amt} F CFA par Mobile Money au ${PAY_NUMBER}, puis entrez l\u2019ID de transaction dans Gestion > Abonnement. Merci !\n\n` +
+    `Hello ${who}, the SITC Café Manager plan for ${c.name} ${past ? 'ended' : 'ends'} on ${en}. ` +
+    `To continue, send ${amt} F CFA by Mobile Money to ${PAY_NUMBER}, then enter the transaction ID under Management > Subscription. Thank you!\n— Stone\u2019s IT Consulting`
+}
 
 // Platform owner (Stone's IT Consulting): every café, payments to confirm, plan prices.
 export default function Platform() {
@@ -29,6 +46,9 @@ export default function Platform() {
     max_stations: p.max_stations === '' || p.max_stations == null ? null : Number(p.max_stations),
   }).eq('plan', p.plan))
 
+  const left = (c) => Math.ceil((end(c) - Date.now()) / DAY)
+  const expiring = cafes.filter((c) => c.status !== 'suspended' && left(c) <= 7 && left(c) > -15).sort((a, b) => left(a) - left(b))
+  const remind = (c) => { supabase.rpc('platform_mark_reminded', { business: c.id }).then(load) }
   const active = cafes.filter((c) => c.status !== 'suspended' && end(c) >= new Date())
   const mrr = active.filter((c) => c.status === 'active').reduce((s, c) => s + (prices.find((p) => p.plan === c.plan)?.monthly || 0), 0)
 
@@ -52,6 +72,24 @@ export default function Platform() {
               <td className="row"><button className="btn small primary" onClick={() => run(supabase.rpc('platform_confirm_payment', { payment: p.id, approve: true }))}>✓ {t('confirm')}</button>
                 <button className="btn small" onClick={() => run(supabase.rpc('platform_confirm_payment', { payment: p.id, approve: false }))}>✗ {t('reject')}</button></td></tr>))}
           </tbody></table></div>)}
+
+      <h2>⏳ {t('expiring_soon')}</h2>
+      {expiring.length === 0 ? <p className="muted">{t('none')}</p> : (
+        <div className="card flush"><table>
+          <thead><tr><th>{t('cafe_name')}</th><th>{t('plan')}</th><th>{t('ends')}</th><th>{t('reminded')}</th><th></th></tr></thead>
+          <tbody>{expiring.map((c) => { const n = left(c); const to = c.owner_whatsapp || c.phone; const txt = reminderText(c, end(c), prices.find((p) => p.plan === c.plan)?.monthly); return (
+            <tr key={c.id}>
+              <td><b>{c.name}</b><div className="muted small">{[c.owner_name, to].filter(Boolean).join(' · ')}</div></td>
+              <td>{t('plan_' + c.plan)}{c.status === 'trial' && <span className="pill">{t('bs_trial')}</span>}</td>
+              <td><span className={n <= 3 ? 'warn' : ''}>{d(end(c))} · {n >= 0 ? `${n} ${t('days')}` : t('bs_expired')}</span></td>
+              <td className="small">{c.last_reminded_at ? d(c.last_reminded_at) : '—'}</td>
+              <td className="row wrap">
+                <a className="btn small wa" href={whatsappUrl(intlPhone(to) ? to : '', txt)} target="_blank" rel="noreferrer" onClick={() => remind(c)}>📲 WhatsApp</a>
+                {intlPhone(to) && <a className="btn small ghost" href={smsUrl(to, txt)} onClick={() => remind(c)}>✉️ SMS</a>}
+              </td>
+            </tr>) })}</tbody>
+        </table></div>)}
+      <p className="muted small">{t('reminders_hint')}</p>
 
       <h2>{t('cafes')}</h2>
       <div className="card flush"><table>

@@ -159,3 +159,35 @@ tr.click { cursor: pointer; } tr.click:hover td { background: #f7f9fc; } tr.sel 
 .land-foot { text-align: center; padding: 28px 16px; border-top: 1px solid var(--line); }
 table input[type=number] { width: 100px; }
 .plan .pill { justify-self: start; } .plan .btn { text-align: center; } .plan > a.btn { margin-top: auto; }
+
+/* Owner tools: WhatsApp summaries, low stock, loyalty, cashier report, price list */
+.badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 999px; background: var(--warn); color: #fff; font-size: .72rem; font-weight: 700; vertical-align: middle; }
+.btn.wa { background: #25d366; border-color: #25d366; color: #fff; text-decoration: none; } .btn.wa:hover { background: #1ebe5b; }
+a.btn { text-decoration: none; display: inline-block; }
+.send-card { border-color: #b7e4c7; background: #f3fbf6; }
+.msg-preview { white-space: pre-wrap; font: inherit; font-size: .9rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin: 10px 0; max-height: 320px; overflow: auto; }
+.low-box { display: grid; gap: 10px; margin-bottom: 16px; }
+.points-box { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-radius: 8px; background: #fffbea; border: 1px solid #fde68a; }
+.points-box label { display: flex; gap: 6px; align-items: center; }
+.r-points { text-align: center; font-size: .85rem; margin-top: 6px; }
+.scroll-x { overflow-x: auto; }
+tr.sub > td { background: #f8fafc; padding: 8px 16px 14px; }
+table.inner { width: 100%; font-size: .88rem; }
+.qr-card { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; }
+.qr-card .qr { width: 200px; height: 200px; border: 1px solid var(--line); border-radius: 8px; }
+@media (max-width: 640px) { .qr-card { grid-template-columns: 1fr; justify-items: center; } }
+.break { word-break: break-all; }
+.trial-bar.urgent { background: #fdecea; border-bottom-color: #f5c2c0; color: #b42318; }
+.menu-page { max-width: 640px; margin: 0 auto; padding: 16px; min-height: 100vh; }
+.menu-head { text-align: center; display: grid; gap: 6px; justify-items: center; margin-bottom: 8px; }
+.menu-head .row { width: 100%; }
+.menu-head h1 { margin: 4px 0 0; color: var(--brand-dark); }
+.menu-head p { margin: 0; }
+.menu-logo { max-height: 90px; max-width: 220px; object-fit: contain; }
+.menu-title { text-align: center; color: var(--accent); }
+.menu-group h3 { margin: 0 0 8px; color: var(--brand); font-size: 1rem; }
+.menu-line { display: flex; align-items: baseline; gap: 6px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.menu-line:last-child { border-bottom: 0; }
+.menu-line .dots { flex: 1; }
+.menu-line b { white-space: nowrap; }
+.menu-page .center { min-height: 0; }

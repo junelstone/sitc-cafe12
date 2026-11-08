@@ -7,6 +7,7 @@ import { errText } from '../lib/errors'
 import { cacheServices, cachedServices, enqueue, isNetworkError, newRef } from '../lib/offline'
 import Receipt from '../components/Receipt.jsx'
 import { useBusiness } from '../lib/business.jsx'
+import { isLow } from '../lib/summary'
 
 export default function Sale() {
   const { t, lang } = useI18n()
@@ -29,6 +30,8 @@ export default function Sale() {
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(null)
   const [offlineDone, setOfflineDone] = useState(null)
+  const [usePts, setUsePts] = useState('')
+  const [lowAfter, setLowAfter] = useState([])
 
   useEffect(() => {
     supabase.from('services').select('*').eq('active', true).order('sort_order').then(({ data, error }) => {
@@ -49,7 +52,12 @@ export default function Sale() {
   const shown = services.filter((s) => (cat === 'all' || s.category === cat) && `${s.name_fr} ${s.name_en}`.toLowerCase().includes(q.toLowerCase()))
   const subtotal = useMemo(() => cart.reduce((a, c) => a + Math.round(c.service.price * (Number(c.quantity) || 0)), 0), [cart])
   const disc = Math.min(Math.max(parseInt(discount, 10) || 0, 0), subtotal)
-  const total = subtotal - disc
+  const loyalty = biz?.plan === 'pro' && biz?.loyalty_enabled
+  const ptValue = biz?.loyalty_value || 0
+  const maxPts = loyalty && account && ptValue > 0 ? Math.min(account.points || 0, Math.floor((subtotal - disc) / ptValue)) : 0
+  const pts = Math.min(Math.max(parseInt(usePts, 10) || 0, 0), maxPts)
+  const total = subtotal - disc - pts * ptValue
+  const willEarn = loyalty && account ? Math.floor(total / (biz.loyalty_per || 100)) : 0
   const rec = parseInt(received, 10) || 0
 
   const add = (s) => setCart((c) => {
@@ -58,7 +66,7 @@ export default function Sale() {
     const n = [...c]; n[i] = { ...n[i], quantity: (Number(n[i].quantity) || 0) + 1 }; return n
   })
   const setQty = (id, v) => setCart((c) => c.map((x) => (x.service.id === id ? { ...x, quantity: v } : x)))
-  const reset = () => { setCart([]); setMomoRef(''); setReceived(''); setDiscount(''); setCustomer(''); setPhone(''); setErr(''); setPay('cash'); setAccount(null); setCustQ('') }
+  const reset = () => { setCart([]); setMomoRef(''); setReceived(''); setDiscount(''); setCustomer(''); setPhone(''); setErr(''); setPay('cash'); setAccount(null); setCustQ(''); setUsePts('') }
   const pickAccount = (c) => { setAccount(c); setCustQ(''); setCustList([]) }
 
   async function checkout() {
@@ -71,21 +79,31 @@ export default function Sale() {
       items: lines.map((c) => ({ service_id: c.service.id, quantity: Number(c.quantity) })),
       payment_method: pay, momo_ref: momoRef.trim(), amount_received: pay === 'cash' ? (rec || total) : total,
       discount: disc, customer_name: customer.trim(), customer_phone: phone.trim(), customer: account?.id || null,
+      ...(pts > 0 ? { redeem_points: pts } : {}),
     }
     const client_ref = newRef()
     setBusy(true)
     const { data, error } = await supabase.rpc('record_sale2', { ...params, client_ref })
     setBusy(false)
-    if (error && isNetworkError(error) && pay !== 'account') {
+    if (error && isNetworkError(error) && pay !== 'account' && pts === 0) {
       const sale = { client_ref, params, created_at: new Date().toISOString(), total, staff: profile.full_name,
         lines: lines.map((c) => ({ label: name(c.service), quantity: Number(c.quantity), unit_price: c.service.price })) }
       enqueue(sale); setOfflineDone(sale); return
     }
     if (error) return setErr(errText(t, error))
     setDone(data.id)
+    // Warn the cashier if this sale took paper or ink below its alert level.
+    const used = [...new Set(lines.map((c) => c.service.stock_item_id).filter(Boolean))]
+    if (used.length) supabase.from('stock_items').select('name, quantity, low_threshold, unit').in('id', used).then(({ data: st }) => setLowAfter((st || []).filter(isLow)))
+    else setLowAfter([])
   }
 
-  if (done) return <section><h1>{t('receipt')}</h1><Receipt saleId={done} onClose={() => { setDone(null); reset() }} /></section>
+  if (done) return (
+    <section><h1>{t('receipt')}</h1>
+      {lowAfter.length > 0 && <p className="alert block no-print">⚠️ {t('low_stock_alert')} {lowAfter.map((i) => `${i.name} (${num(i.quantity)} ${i.unit})`).join(', ')}</p>}
+      <Receipt saleId={done} onClose={() => { setDone(null); setLowAfter([]); reset() }} />
+    </section>
+  )
   if (offlineDone) return (
     <section><h1>{t('receipt')}</h1>
       <div className="receipt-wrap">
@@ -146,7 +164,7 @@ export default function Sale() {
 
         {account ? (
           <div className="acct-pill"><span>👤 <b>{account.name}</b> · {t('balance_short')} <span className={account.balance < 0 ? 'warn' : 'ok'}>{fcfa(account.balance)}</span></span>
-            <button className="btn ghost small" onClick={() => { setAccount(null); if (pay === 'account') setPay('cash') }}>✕</button></div>
+            <button className="btn ghost small" onClick={() => { setAccount(null); setUsePts(''); if (pay === 'account') setPay('cash') }}>✕</button></div>
         ) : (
           <div className="cust-search">
             <input placeholder={'👤 ' + t('find_customer')} value={custQ} onChange={(e) => setCustQ(e.target.value)} />
@@ -154,6 +172,16 @@ export default function Sale() {
           </div>
         )}
 
+        {loyalty && account && (
+          <div className="points-box">
+            <span>⭐ <b>{num(account.points || 0)}</b> {t('points')} <span className="muted small">(= {fcfa((account.points || 0) * ptValue)})</span></span>
+            {maxPts > 0 && <label className="row"><span className="small">{t('use_points')}</span>
+              <input className="w-amt" type="number" min="0" max={maxPts} value={usePts} onChange={(e) => setUsePts(e.target.value)} placeholder="0" />
+              <button type="button" className="btn ghost small" onClick={() => setUsePts(String(maxPts))}>{t('max')}</button></label>}
+            {pts > 0 && <span className="ok small">− {fcfa(pts * ptValue)}</span>}
+            {willEarn > 0 && <span className="muted small">+{willEarn} {t('points')} {t('after_sale')}</span>}
+          </div>
+        )}
         <div className={'seg wide' + (account ? ' three' : '')}>
           <button className={pay === 'cash' ? 'on' : ''} onClick={() => setPay('cash')}>💵 {t('pay_cash')}</button>
           <button className={pay === 'mobile_money' ? 'on' : ''} onClick={() => setPay('mobile_money')}>📱 {t('pay_momo')}</button>

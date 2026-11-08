@@ -5,6 +5,9 @@ import { useAuth } from '../lib/auth.jsx'
 import { fcfa, num } from '../lib/format'
 import { errText } from '../lib/errors'
 import Receipt from '../components/Receipt.jsx'
+import SendOwner from '../components/SendOwner.jsx'
+import { useBusiness } from '../lib/business.jsx'
+import { daySummary, isLow } from '../lib/summary'
 
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10) }
 
@@ -16,6 +19,9 @@ export default function Report() {
   const [items, setItems] = useState([])
   const [open, setOpen] = useState(null)
   const [msg, setMsg] = useState('')
+  const [low, setLow] = useState([])
+  const [share, setShare] = useState(false)
+  const { biz } = useBusiness()
 
   async function load() {
     const start = new Date(day + 'T00:00:00'), end = new Date(start); end.setDate(end.getDate() + 1)
@@ -25,7 +31,10 @@ export default function Report() {
     const ids = (data || []).filter((s) => !s.voided).map((s) => s.id)
     if (ids.length) { const r = await supabase.from('sale_items').select('*').in('sale_id', ids); setItems(r.data || []) } else setItems([])
   }
-  useEffect(() => { load() }, [day])
+  useEffect(() => { load() }, [day]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    supabase.from('stock_items').select('name, quantity, low_threshold, unit').eq('active', true).then(({ data }) => setLow((data || []).filter(isLow)))
+  }, [])
 
   const live = sales.filter((s) => !s.voided)
   const sum = (arr) => arr.reduce((a, s) => a + s.total, 0)
@@ -33,6 +42,8 @@ export default function Report() {
   const byStaff = useMemo(() => Object.values(live.reduce((m, s) => { const k = s.staff?.full_name || '?'; m[k] = m[k] || { name: k, n: 0, total: 0 }; m[k].n++; m[k].total += s.total; return m }, {})), [sales])
   const byService = useMemo(() => Object.values(items.reduce((m, i) => { m[i.label] = m[i.label] || { label: i.label, q: 0, total: 0 }; m[i.label].q += Number(i.quantity); m[i.label].total += i.line_total; return m }, {})).sort((a, b) => b.total - a.total), [items])
   const label = (l) => { const [fr, en] = l.split(' / '); return lang === 'fr' ? fr : (en || fr) }
+  const summaryText = daySummary({ day, biz, totals: { all: sum(live), ...byPay }, count: live.length, byStaff,
+    top: byService.slice(0, 3).map((r) => ({ label: label(r.label), total: r.total })), low, t, lang })
 
   async function voidSale(id) {
     const reason = window.prompt(t('void_reason'))
@@ -53,6 +64,13 @@ export default function Report() {
         <div className="kpi"><span>📱 {t('pay_momo')}</span><b>{fcfa(byPay.mobile_money)}</b></div>
         {byPay.account > 0 && <div className="kpi"><span>👤 {t('pay_account')}</span><b>{fcfa(byPay.account)}</b></div>}
       </div>
+      {isAdmin && (share ? (
+        <div className="card send-card">
+          <div className="row between"><b>📲 {t('send_summary_title')}</b><button className="btn ghost small" onClick={() => setShare(false)}>✕</button></div>
+          <pre className="msg-preview">{summaryText}</pre>
+          <SendOwner text={summaryText} />
+        </div>
+      ) : <button className="btn mb" onClick={() => setShare(true)}>📲 {t('send_day_summary')}</button>)}
       <div className="grid2">
         {isAdmin && <div className="card flush"><table><thead><tr><th>{t('by_staff')}</th><th className="num">{t('sales_count')}</th><th className="num">{t('total')}</th></tr></thead>
           <tbody>{byStaff.map((r) => <tr key={r.name}><td>{r.name}</td><td className="num">{r.n}</td><td className="num">{fcfa(r.total)}</td></tr>)}</tbody></table></div>}

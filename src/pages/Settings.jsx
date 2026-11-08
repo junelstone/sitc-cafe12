@@ -5,6 +5,7 @@ import { useBusiness } from '../lib/business.jsx'
 import { num } from '../lib/format'
 import { errText } from '../lib/errors'
 import BizLogo from '../components/BizLogo.jsx'
+import QRCode from 'qrcode'
 
 export default function Settings() {
   const { t } = useI18n()
@@ -23,6 +24,34 @@ export default function Settings() {
   }
   useEffect(() => { load() }, [])
   useEffect(() => { if (biz && !s) setS(biz) }, [biz]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [qr, setQr] = useState('')
+  const menuUrl = biz ? `${window.location.origin}/menu/${biz.id}` : ''
+  useEffect(() => { if (menuUrl) QRCode.toDataURL(menuUrl, { width: 480, margin: 1, color: { dark: '#0d3b78' } }).then(setQr) }, [menuUrl])
+
+  async function saveFeatures(e, patch = {}) {
+    e?.preventDefault()
+    const v = { ...s, ...patch }
+    const { error } = await supabase.rpc('update_my_features', {
+      owner_whatsapp: v.owner_whatsapp || '', menu_public: v.menu_public !== false, loyalty_enabled: Boolean(v.loyalty_enabled),
+      loyalty_per: parseInt(v.loyalty_per, 10) || 100, loyalty_value: parseInt(v.loyalty_value, 10) || 0,
+    })
+    setMsg(error ? errText(t, error) : t('saved'))
+    if (!error) { setS(v); refresh() }
+  }
+  function printPoster() {
+    const w = window.open('', '_blank')
+    if (!w) return
+    const esc = (x) => String(x || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+    w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(biz.name)}</title>
+      <body style="font-family:system-ui,sans-serif;text-align:center;padding:40px;color:#0d3b78">
+      ${biz.logo_url ? `<img src="${esc(biz.logo_url)}" style="max-height:110px;max-width:260px">` : ''}
+      <h1 style="margin:16px 0 4px">${esc(biz.name)}</h1>
+      <h2 style="font-weight:600;color:#2e7d32;margin:0 0 24px">Scannez pour voir nos prix<br>Scan to see our prices</h2>
+      <img src="${qr}" style="width:340px;height:340px">
+      <p style="font-size:14px;color:#555">${esc(menuUrl)}</p>
+      <script>window.onload=()=>setTimeout(()=>window.print(),300)</script></body>`)
+    w.document.close()
+  }
 
   async function saveBiz(e, patch = {}) {
     e?.preventDefault()
@@ -81,6 +110,36 @@ export default function Settings() {
         <div className="row end span2"><button className="btn primary">{t('save')}</button></div>
       </form>
 
+      <form className="card grid2" onSubmit={saveFeatures}>
+        <h2 className="span2 mt0">📲 {t('owner_summary')}</h2>
+        <label>{t('owner_whatsapp')}<input type="tel" value={s.owner_whatsapp || ''} onChange={setB('owner_whatsapp')} placeholder="06 453 02 55" /></label>
+        <p className="muted small">{t('owner_whatsapp_hint')}</p>
+
+        <h2 className="span2">⭐ {t('loyalty')} {biz.plan !== 'pro' && <span className="pill">Pro</span>}</h2>
+        {biz.plan === 'pro' ? <>
+          <label className="check span2"><input type="checkbox" checked={Boolean(s.loyalty_enabled)} onChange={(e) => setS({ ...s, loyalty_enabled: e.target.checked })} /> {t('loyalty_on')}</label>
+          <label>{t('loyalty_per')}<input type="number" min="1" value={s.loyalty_per ?? 100} onChange={setB('loyalty_per')} disabled={!s.loyalty_enabled} /></label>
+          <label>{t('loyalty_value')}<input type="number" min="0" value={s.loyalty_value ?? 5} onChange={setB('loyalty_value')} disabled={!s.loyalty_enabled} /></label>
+          {s.loyalty_enabled && <p className="muted small span2">{t('loyalty_example').replace('{per}', s.loyalty_per || 100).replace('{val}', s.loyalty_value || 0).replace('{ten}', 10 * (s.loyalty_value || 0))}</p>}
+        </> : <p className="muted span2">{t('pro_only_feature')}</p>}
+        <div className="row end span2"><button className="btn primary">{t('save')}</button></div>
+      </form>
+
+      <h2>🔳 {t('price_list')}</h2>
+      <div className="card qr-card">
+        {qr && <img className="qr" src={qr} alt="QR" />}
+        <div className="grid1">
+          <p className="muted small">{t('price_list_hint')}</p>
+          <label className="check"><input type="checkbox" checked={s.menu_public !== false} onChange={(e) => saveFeatures(null, { menu_public: e.target.checked })} /> {t('menu_public')}</label>
+          <a href={menuUrl} target="_blank" rel="noreferrer" className="small break">{menuUrl}</a>
+          <div className="row wrap">
+            <button type="button" className="btn" onClick={() => navigator.clipboard?.writeText(menuUrl).then(() => setMsg(t('link_copied')))}>📋 {t('copy_link')}</button>
+            <button type="button" className="btn" onClick={printPoster} disabled={!qr}>🖨️ {t('print_qr')}</button>
+            {qr && <a className="btn ghost" href={qr} download="qr-prix.png">⬇ PNG</a>}
+          </div>
+        </div>
+      </div>
+
       <h2>{t('stations')}</h2>
       <div className="card">
         {stations.map((st) => (
@@ -90,7 +149,7 @@ export default function Settings() {
         <form className="row" onSubmit={stAdd}><input required placeholder={`PC ${stations.length + 1}`} value={newSt} onChange={(e) => setNewSt(e.target.value)} /><button className="btn">+ {t('add_station')}</button></form>
       </div>
 
-      <div className="row between"><h2>{t('stock_items')}</h2><button className="btn" onClick={() => setItem({ name: '', unit: 'pcs', quantity: 0, low_threshold: 0, active: true })}>+ {t('add_item')}</button></div>
+      <div className="row between"><h2>{t('stock_items')}</h2><button className="btn" onClick={() => setItem({ name: '', unit: 'pcs', quantity: 0, low_threshold: 10, active: true })}>+ {t('add_item')}</button></div>
       {item && (
         <form className="card grid2" onSubmit={saveItem}>
           <label>{t('item_name')}<input required value={item.name} onChange={setI('name')} /></label>
